@@ -1,9 +1,9 @@
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import loader
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
 from django.urls import reverse
-
+from django.views import generic  # add generic view to shorten codes
 
 from .models import Question, Choice
 
@@ -14,6 +14,22 @@ def index(request):
     context = {"latest_question_list": latest_question_list}
     return HttpResponse(template.render(context, request))
     # or return render(request, "polls/index.html", context)
+
+class IndexView(generic.ListView):
+    template_name = "polls/index.html"
+    context_object_name = "latest_question_list"
+
+    # get latest five questions
+    def get_queryset(self):
+        return Question.objects.order_by("pub_date")[:5]
+
+class DetailView(generic.DetailView):
+    model = Question
+    template_name = "polls/detail.html"
+
+class ResultView(generic.DetailView):
+    model = Question
+    template_name = "polls/result.html"
 
 def detail(request, question_id):
     # question = get_object_or_404(Question, pk=question_id)
